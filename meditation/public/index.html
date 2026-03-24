@@ -1,0 +1,1717 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#1a1a1a" />
+  <title>Meditation</title>
+  <style>
+    /* ── Grundlayout ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+      background: #111;
+    }
+
+    /* ── Hintergrundbild ── */
+    #bg {
+      position: fixed;
+      inset: 0;
+      background-image: url('https://images.unsplash.com/photo-1687010525016-9c509030e560?w=800&q=80');
+      background-size: cover;
+      background-position: center top;
+      filter: brightness(0.75);
+      z-index: 0;
+    }
+
+    /* ── Haupt-Container ── */
+    #app {
+      position: relative;
+      z-index: 1;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── Timer-Bereich (obere Hälfte) ── */
+    #timer-section {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding-top: env(safe-area-inset-top, 20px);
+      position: relative;
+    }
+
+    /* ── Gong-Button ── */
+    #gong-btn {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      position: relative;
+      padding: 0;
+      overflow: hidden;
+      background: transparent;
+      box-shadow:
+        0 0 0 6px rgba(255,200,100,0.15),
+        0 0 0 12px rgba(180,130,50,0.1),
+        0 8px 40px rgba(0,0,0,0.7);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #gong-btn:active {
+      transform: scale(0.95);
+      box-shadow:
+        0 0 0 4px rgba(255,200,100,0.2),
+        0 4px 20px rgba(0,0,0,0.6);
+    }
+
+    #gong-btn.running {
+      animation: gong-pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes gong-pulse {
+      0%, 100% { box-shadow: 0 0 0 6px rgba(255,200,100,0.15), 0 0 0 12px rgba(180,130,50,0.1), 0 8px 40px rgba(0,0,0,0.7); }
+      50%       { box-shadow: 0 0 0 12px rgba(255,180,60,0.25), 0 0 0 24px rgba(180,130,50,0.12), 0 8px 50px rgba(0,0,0,0.7); }
+    }
+
+    #gong-label {
+      color: rgba(255,255,255,0.9);
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 4px;
+      text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+      margin-top: 10px;
+      position: absolute;
+      bottom: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    /* Pause-Controls (Fortsetzen + Zurücksetzen) */
+    #pause-controls {
+      position: absolute;
+      bottom: 30%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 220px;
+    }
+
+    .pause-btn {
+      width: 100%;
+      padding: 12px 0;
+      border-radius: 12px;
+      border: none;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 0.15s;
+    }
+
+    .pause-btn:active { opacity: 0.75; }
+
+    #btn-fortsetzen {
+      background: rgba(224,123,0,0.85);
+      color: #fff;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    #btn-zuruecksetzen {
+      background: rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+
+    /* ── Timer-Anzeige ── */
+    #timer-display {
+      font-size: clamp(52px, 14vw, 72px);
+      font-weight: 200;
+      letter-spacing: 2px;
+      color: #fff;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+      font-variant-numeric: tabular-nums;
+      position: absolute;
+      top: 22%;
+      left: 0;
+      right: 0;
+      transform: translateY(-50%);
+      text-align: center;
+      background: rgba(0,0,0,0.30);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 14px 0;
+    }
+
+    /* ── Fortschrittsring um Gong ── */
+    #progress-ring-wrap {
+      position: absolute;
+      top: 0; left: 0;
+      width: 160px;
+      height: 160px;
+      pointer-events: none;
+    }
+
+    #progress-ring-wrap svg {
+      width: 160px;
+      height: 160px;
+      transform: rotate(-90deg);
+    }
+
+    #progress-ring {
+      fill: none;
+      stroke: rgba(255,165,40,0.8);
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-dasharray: 471;
+      stroke-dashoffset: 471;
+      transition: stroke-dashoffset 1s linear;
+    }
+
+    #gong-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── Einstellungen-Button oben rechts ── */
+    #settings-btn-top {
+      position: absolute;
+      top: calc(env(safe-area-inset-top, 16px) + 10px);
+      right: 16px;
+      background: rgba(0,0,0,0.35);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: rgba(255,255,255,0.85);
+      -webkit-tap-highlight-color: transparent;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 10;
+    }
+
+    #settings-btn-top:active { background: rgba(0,0,0,0.55); }
+
+    /* ── Logout-Button oben links ── */
+    #logout-btn {
+      position: absolute;
+      top: calc(env(safe-area-inset-top, 16px) + 10px);
+      left: 16px;
+      background: rgba(0,0,0,0.35);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: rgba(255,255,255,0.6);
+      -webkit-tap-highlight-color: transparent;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 10;
+      font-size: 16px;
+    }
+
+    #logout-btn:active { background: rgba(0,0,0,0.55); }
+
+    /* ── History-Button (oben mitte-links) ── */
+    #history-btn {
+      position: absolute;
+      top: calc(env(safe-area-inset-top, 16px) + 10px);
+      left: 66px;
+      background: rgba(0,0,0,0.35);
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: rgba(255,255,255,0.85);
+      -webkit-tap-highlight-color: transparent;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 10;
+    }
+
+    #history-btn:active { background: rgba(0,0,0,0.55); }
+
+    /* ── History-Ansicht ── */
+    #history-view {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      background: #111;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    #history-view.open { display: flex; }
+
+    #history-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: calc(env(safe-area-inset-top, 20px) + 14px) 16px 14px;
+      background: #1a1a1a;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    #history-back {
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.8);
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #history-title {
+      color: #fff;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    #history-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: #2a2a2a;
+      margin: 0 0 8px;
+    }
+
+    .history-stat {
+      background: #1a1a1a;
+      padding: 16px 8px;
+      text-align: center;
+    }
+
+    .history-stat-value {
+      color: #fff;
+      font-size: 26px;
+      font-weight: 700;
+      display: block;
+    }
+
+    .history-stat-label {
+      color: rgba(255,255,255,0.45);
+      font-size: 10px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      display: block;
+      margin-top: 2px;
+    }
+
+    #history-list {
+      flex: 1;
+      padding: 0 0 env(safe-area-inset-bottom, 20px);
+    }
+
+    .session-item {
+      display: flex;
+      align-items: center;
+      padding: 14px 16px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+
+    .session-info {
+      flex: 1;
+    }
+
+    .session-date {
+      color: rgba(255,255,255,0.9);
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .session-detail {
+      color: rgba(255,255,255,0.45);
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
+    .session-duration {
+      color: rgba(255,255,255,0.7);
+      font-size: 14px;
+      font-weight: 500;
+      margin-right: 12px;
+    }
+
+    .session-delete {
+      background: rgba(200,50,50,0.25);
+      border: none;
+      border-radius: 50%;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: #e05555;
+      -webkit-tap-highlight-color: transparent;
+      flex-shrink: 0;
+    }
+
+    .session-delete:active { background: rgba(200,50,50,0.45); }
+
+    #history-empty {
+      text-align: center;
+      color: rgba(255,255,255,0.35);
+      font-size: 15px;
+      padding: 60px 20px;
+    }
+
+    /* ── Steuerbereich (untere Hälfte) ── */
+    #controls-section {
+      width: 100%;
+      background: rgba(0,0,0,0.52);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 28px 28px 0 0;
+      padding: 14px 36px calc(14px + env(safe-area-inset-bottom, 10px));
+    }
+
+    /* ── Zeile: Label + Einheit ── */
+    .ctrl-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 7px;
+    }
+
+    .ctrl-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      color: rgba(255,255,255,0.85);
+      text-transform: uppercase;
+    }
+
+    .ctrl-value {
+      font-size: 15px;
+      font-weight: 600;
+      color: #4CAF50;
+      letter-spacing: 1px;
+    }
+
+    /* ── Slider-Zeile ── */
+    .slider-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .slider-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.22);
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      font-size: 16px;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s;
+    }
+
+    .slider-btn:active { background: rgba(255,255,255,0.2); }
+
+    /* ── Range-Input ── */
+    input[type=range] {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 20px;
+      border-radius: 4px;
+      background: transparent;
+      outline: none;
+      cursor: pointer;
+      touch-action: pan-x;
+    }
+
+    input[type=range]::-webkit-slider-runnable-track {
+      height: 4px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.2);
+    }
+
+    input[type=range]::-moz-range-track {
+      height: 4px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.2);
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, #ffb347, #e07b00);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      cursor: pointer;
+      margin-top: -9px;
+    }
+
+    input[type=range]::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, #ffb347, #e07b00);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+      border: none;
+      cursor: pointer;
+    }
+
+    input[type=range]::-webkit-slider-runnable-track {
+      background: linear-gradient(to right,
+        rgba(224,123,0,0.8) 0%,
+        rgba(224,123,0,0.8) var(--fill, 50%),
+        rgba(255,255,255,0.2) var(--fill, 50%),
+        rgba(255,255,255,0.2) 100%
+      );
+    }
+
+    /* ── Trenner ── */
+    .divider {
+      height: 1px;
+      background: rgba(255,255,255,0.12);
+      margin: 4px 0 16px;
+    }
+
+    /* ── Einstellungen-Modal ── */
+    #settings-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      align-items: flex-end;
+    }
+
+    #settings-modal.open { display: flex; }
+
+    #settings-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+    }
+
+    #settings-sheet {
+      position: relative;
+      width: 100%;
+      background: rgba(25,22,18,0.97);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-radius: 24px 24px 0 0;
+      padding: 20px 22px calc(30px + env(safe-area-inset-bottom, 10px));
+      color: #fff;
+    }
+
+    #settings-sheet h2 {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 18px;
+      text-align: center;
+    }
+
+    .gong-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .gong-option:last-of-type { border-bottom: none; }
+
+    .gong-option-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .gong-radio {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      flex-shrink: 0;
+    }
+
+    .gong-radio.selected { border-color: #e07b00; }
+
+    .gong-radio.selected::after {
+      content: '';
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #e07b00;
+    }
+
+    .gong-name { font-size: 16px; font-weight: 500; }
+
+    .play-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .play-btn:active { background: rgba(224,123,0,0.5); }
+
+    #settings-close {
+      margin-top: 20px;
+      width: 100%;
+      padding: 14px;
+      border-radius: 14px;
+      border: none;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* ── Vorlauf-Countdown auf der Schale ── */
+    #vorlauf-overlay {
+      position: absolute;
+      top: 0; left: 0;
+      width: 160px;
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    #vorlauf-number {
+      font-size: 68px;
+      font-weight: 100;
+      color: rgba(255, 248, 210, 0.95);
+      text-shadow: 0 2px 16px rgba(0,0,0,0.9), 0 0 30px rgba(180,100,0,0.5);
+      font-variant-numeric: tabular-nums;
+      opacity: 0;
+      transition: opacity 0.35s ease-in;
+    }
+
+    #vorlauf-number.show  { opacity: 1; }
+    #vorlauf-number.fade  { opacity: 0; transition: opacity 0.55s ease-out; }
+
+    /* ── Gong-Flash Overlay ── */
+    #gong-flash {
+      position: fixed;
+      inset: 0;
+      background: rgba(255,200,80,0.35);
+      pointer-events: none;
+      opacity: 0;
+      z-index: 50;
+      transition: opacity 0.5s ease-out;
+    }
+
+    #gong-flash.flash {
+      opacity: 1;
+      transition: none;
+    }
+
+    /* ════════════════════════════════════════════════════════════════════════
+       LOGIN-OVERLAY
+       Liegt über allem anderen (z-index: 200) und blendet die App ab.
+       Wird via JS ein-/ausgeblendet basierend auf dem JWT im localStorage.
+    ════════════════════════════════════════════════════════════════════════ */
+    #login-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(10, 8, 5, 0.92);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      padding: 24px;
+      padding-top: calc(env(safe-area-inset-top, 20px) + 24px);
+      padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 24px);
+    }
+
+    /* Versteckt wenn angemeldet */
+    #login-overlay.hidden { display: none; }
+
+    /* Klangschalen-Icon über dem Login */
+    #login-icon {
+      width: 90px;
+      height: 90px;
+      margin-bottom: 28px;
+      opacity: 0.9;
+    }
+
+    #login-title {
+      font-size: 26px;
+      font-weight: 200;
+      letter-spacing: 6px;
+      color: #fff;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    #login-subtitle {
+      font-size: 13px;
+      color: rgba(255,255,255,0.45);
+      letter-spacing: 1.5px;
+      margin-bottom: 40px;
+    }
+
+    /* Login-Formular */
+    #login-form {
+      width: 100%;
+      max-width: 340px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .login-input {
+      width: 100%;
+      padding: 16px 20px;
+      border-radius: 14px;
+      border: 1.5px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.07);
+      color: #fff;
+      font-size: 16px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+
+    .login-input::placeholder { color: rgba(255,255,255,0.35); }
+    .login-input:focus { border-color: rgba(224,123,0,0.7); }
+
+    #login-btn {
+      width: 100%;
+      padding: 16px;
+      border-radius: 14px;
+      border: none;
+      background: linear-gradient(135deg, #e07b00, #c05500);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-top: 6px;
+      -webkit-tap-highlight-color: transparent;
+      transition: opacity 0.2s;
+    }
+
+    #login-btn:active { opacity: 0.8; }
+    #login-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* Fehlermeldung */
+    #login-error {
+      font-size: 14px;
+      color: #ff6b6b;
+      text-align: center;
+      min-height: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    /* Lade-Spinner im Button */
+    #login-btn.loading::after {
+      content: ' ●●●';
+      animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0.3; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Hintergrundbild (immer sichtbar, auch hinter Login) -->
+<div id="bg"></div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     LOGIN-OVERLAY — wird ausgeblendet sobald JWT gültig ist
+════════════════════════════════════════════════════════════════════════ -->
+<div id="login-overlay">
+
+  <!-- Klangschalen-SVG als Icon -->
+  <svg id="login-icon" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="lg-base" cx="38%" cy="32%" r="72%">
+        <stop offset="0%"   stop-color="#f5d070"/>
+        <stop offset="18%"  stop-color="#e09825"/>
+        <stop offset="42%"  stop-color="#9a550e"/>
+        <stop offset="70%"  stop-color="#5e2e04"/>
+        <stop offset="100%" stop-color="#2e1200"/>
+      </radialGradient>
+      <radialGradient id="lg-rim" cx="50%" cy="50%" r="50%">
+        <stop offset="72%"  stop-color="rgba(0,0,0,0)"/>
+        <stop offset="100%" stop-color="rgba(0,0,0,0.6)"/>
+      </radialGradient>
+      <clipPath id="lc-clip"><circle cx="80" cy="80" r="78"/></clipPath>
+    </defs>
+    <circle cx="80" cy="80" r="78" fill="url(#lg-base)"/>
+    <g clip-path="url(#lc-clip)" fill="none">
+      <circle cx="80" cy="80" r="66" stroke="rgba(30,12,0,0.45)" stroke-width="1.6"/>
+      <circle cx="80" cy="80" r="54" stroke="rgba(30,12,0,0.40)" stroke-width="1.3"/>
+      <circle cx="80" cy="80" r="42" stroke="rgba(30,12,0,0.35)" stroke-width="1.1"/>
+      <circle cx="80" cy="80" r="30" stroke="rgba(30,12,0,0.28)" stroke-width="0.9"/>
+    </g>
+    <circle cx="80" cy="80" r="8"  fill="#c87c18" opacity="0.9"/>
+    <circle cx="80" cy="80" r="4"  fill="#f0c050" opacity="0.7"/>
+    <circle cx="80" cy="80" r="78" fill="url(#lg-rim)"/>
+  </svg>
+
+  <h1 id="login-title">Meditation</h1>
+  <p id="login-subtitle">Bitte anmelden</p>
+
+  <form id="login-form" onsubmit="handleLogin(event)">
+    <input
+      class="login-input"
+      type="email"
+      id="login-email"
+      placeholder="E-Mail"
+      autocomplete="email"
+      inputmode="email"
+      required
+    />
+    <input
+      class="login-input"
+      type="password"
+      id="login-password"
+      placeholder="Passwort"
+      autocomplete="current-password"
+      required
+    />
+    <p id="login-error"></p>
+    <button type="submit" id="login-btn">Anmelden</button>
+  </form>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     MEDITATIONS-APP (wird sichtbar nach erfolgreichem Login)
+════════════════════════════════════════════════════════════════════════ -->
+<div id="app">
+
+  <!-- Timer-Bereich -->
+  <div id="timer-section">
+
+    <!-- Logout-Button oben links -->
+    <button id="logout-btn" onclick="handleLogout()" aria-label="Abmelden" title="Abmelden">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+    </button>
+
+    <!-- History-Button oben links (neben Logout) -->
+    <button id="history-btn" onclick="openHistory()" aria-label="Meine Meditationen">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 8v4l3 3"/>
+        <circle cx="12" cy="12" r="9"/>
+      </svg>
+    </button>
+
+    <!-- Einstellungen-Button oben rechts -->
+    <button id="settings-btn-top" onclick="openSettings()" aria-label="Einstellungen öffnen">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
+
+    <div id="gong-wrapper">
+      <!-- Fortschrittsring -->
+      <div id="progress-ring-wrap">
+        <svg viewBox="0 0 160 160">
+          <circle id="progress-ring" cx="80" cy="80" r="75" />
+        </svg>
+      </div>
+
+      <!-- Vorlauf-Countdown -->
+      <div id="vorlauf-overlay">
+        <span id="vorlauf-number"></span>
+      </div>
+
+      <!-- Gong / Start-Button mit realistischer SVG-Klangschale -->
+      <button id="gong-btn" onclick="toggleTimer()" aria-label="Meditation starten/pausieren">
+        <svg viewBox="0 0 160 160" width="160" height="160" xmlns="http://www.w3.org/2000/svg" style="display:block;pointer-events:none;">
+          <defs>
+            <radialGradient id="g-base" cx="38%" cy="32%" r="72%">
+              <stop offset="0%"   stop-color="#f5d070"/>
+              <stop offset="18%"  stop-color="#e09825"/>
+              <stop offset="42%"  stop-color="#9a550e"/>
+              <stop offset="70%"  stop-color="#5e2e04"/>
+              <stop offset="100%" stop-color="#2e1200"/>
+            </radialGradient>
+            <radialGradient id="g-depth" cx="62%" cy="68%" r="55%">
+              <stop offset="0%"   stop-color="rgba(0,0,0,0.0)"/>
+              <stop offset="60%"  stop-color="rgba(0,0,0,0.0)"/>
+              <stop offset="100%" stop-color="rgba(0,0,0,0.55)"/>
+            </radialGradient>
+            <radialGradient id="g-rim" cx="50%" cy="50%" r="50%">
+              <stop offset="72%"  stop-color="rgba(0,0,0,0)"/>
+              <stop offset="100%" stop-color="rgba(0,0,0,0.6)"/>
+            </radialGradient>
+            <filter id="f-metal" x="0%" y="0%" width="100%" height="100%" color-interpolation-filters="sRGB">
+              <feTurbulence type="fractalNoise" baseFrequency="0.42 0.18" numOctaves="4" seed="7" result="noise"/>
+              <feDiffuseLighting in="noise" lighting-color="#ffd060" diffuseConstant="2.4" surfaceScale="5" result="lit">
+                <fePointLight x="52" y="38" z="110"/>
+              </feDiffuseLighting>
+              <feComposite in="lit" in2="SourceGraphic" operator="multiply"/>
+            </filter>
+            <filter id="f-spec" x="0%" y="0%" width="100%" height="100%" color-interpolation-filters="sRGB">
+              <feSpecularLighting in="SourceAlpha" specularConstant="1.2" specularExponent="45"
+                                  lighting-color="white" surfaceScale="6" result="spec">
+                <fePointLight x="56" y="40" z="130"/>
+              </feSpecularLighting>
+              <feComposite in="spec" in2="SourceAlpha" operator="in"/>
+            </filter>
+            <clipPath id="bowl-clip">
+              <circle cx="80" cy="80" r="78"/>
+            </clipPath>
+          </defs>
+          <circle cx="80" cy="80" r="78" fill="url(#g-base)"/>
+          <circle cx="80" cy="80" r="78" fill="url(#g-base)" filter="url(#f-metal)" opacity="0.5" clip-path="url(#bowl-clip)"/>
+          <g clip-path="url(#bowl-clip)" fill="none">
+            <circle cx="80" cy="80" r="66" stroke="rgba(30,12,0,0.45)" stroke-width="1.6"/>
+            <circle cx="80" cy="80" r="66" stroke="rgba(255,210,90,0.18)" stroke-width="0.8"/>
+            <circle cx="80" cy="80" r="54" stroke="rgba(30,12,0,0.40)" stroke-width="1.3"/>
+            <circle cx="80" cy="80" r="54" stroke="rgba(255,210,90,0.14)" stroke-width="0.7"/>
+            <circle cx="80" cy="80" r="42" stroke="rgba(30,12,0,0.35)" stroke-width="1.1"/>
+            <circle cx="80" cy="80" r="42" stroke="rgba(255,210,90,0.12)" stroke-width="0.6"/>
+            <circle cx="80" cy="80" r="30" stroke="rgba(30,12,0,0.28)" stroke-width="0.9"/>
+            <circle cx="80" cy="80" r="30" stroke="rgba(255,210,90,0.10)" stroke-width="0.5"/>
+            <circle cx="80" cy="80" r="18" stroke="rgba(30,12,0,0.22)" stroke-width="0.8"/>
+          </g>
+          <circle cx="80" cy="80" r="8"  fill="#c87c18" opacity="0.9"/>
+          <circle cx="80" cy="80" r="4"  fill="#f0c050" opacity="0.7"/>
+          <circle cx="78" cy="78" r="2"  fill="rgba(255,240,180,0.8)"/>
+          <ellipse cx="80" cy="80" rx="78" ry="78" fill="rgba(255,230,140,0.35)" filter="url(#f-spec)" opacity="0.65" clip-path="url(#bowl-clip)"/>
+          <ellipse cx="60" cy="52" rx="20" ry="13" fill="rgba(255,245,190,0.18)" transform="rotate(-20,60,52)"/>
+          <circle cx="80" cy="80" r="78" fill="url(#g-rim)"/>
+          <circle cx="80" cy="80" r="78" fill="url(#g-depth)"/>
+        </svg>
+      </button>
+    </div>
+
+    <span id="gong-label">START</span>
+    <div id="pause-controls" style="display:none; flex-direction:column; align-items:center; gap:10px; margin-top:8px;">
+      <button class="pause-btn" id="btn-fortsetzen" onclick="toggleTimer()">Fortsetzen</button>
+      <button class="pause-btn" id="btn-zuruecksetzen" onclick="resetTimer()">Zurücksetzen</button>
+    </div>
+    <div id="timer-display">30:00</div>
+  </div>
+
+  <!-- Steuerbereich -->
+  <div id="controls-section">
+    <!-- Meditationsdauer -->
+    <div class="ctrl-header">
+      <span class="ctrl-label">Meditationsdauer</span>
+    </div>
+    <div class="slider-row">
+      <button class="slider-btn" onclick="adjustDuration(-1)" aria-label="Dauer verringern">−</button>
+      <input type="range" id="duration-slider" min="1" max="60" value="30"
+             oninput="onDurationChange(this.value)" aria-label="Meditationsdauer" />
+      <button class="slider-btn" onclick="adjustDuration(1)" aria-label="Dauer erhöhen">+</button>
+    </div>
+
+    <!-- Zwischengong -->
+    <div class="ctrl-header">
+      <span class="ctrl-label">Zwischengong</span>
+      <span class="ctrl-value" id="zwischengong-value">15m</span>
+    </div>
+    <div class="slider-row">
+      <button class="slider-btn" onclick="adjustZwischengong(-1)" aria-label="Zwischengong früher">−</button>
+      <input type="range" id="zwischengong-slider" min="1" max="29" value="15"
+             oninput="onZwischengongChange(this.value)" aria-label="Zwischengong-Zeitpunkt" />
+      <button class="slider-btn" onclick="adjustZwischengong(1)" aria-label="Zwischengong später">+</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- Gong-Flash -->
+<div id="gong-flash"></div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     HISTORY-ANSICHT — "Meine Meditationen"
+════════════════════════════════════════════════════════════════════════ -->
+<div id="history-view">
+  <div id="history-header">
+    <button id="history-back" onclick="closeHistory()" aria-label="Zurück">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="15 18 9 12 15 6"/>
+      </svg>
+    </button>
+    <span id="history-title">Meine Meditationen</span>
+  </div>
+
+  <div id="history-stats">
+    <div class="history-stat">
+      <span class="history-stat-value" id="stat-sessions">0</span>
+      <span class="history-stat-label">Sessions</span>
+    </div>
+    <div class="history-stat">
+      <span class="history-stat-value" id="stat-minutes">0</span>
+      <span class="history-stat-label">Minuten</span>
+    </div>
+    <div class="history-stat">
+      <span class="history-stat-value" id="stat-streak">0</span>
+      <span class="history-stat-label">Längste Serie</span>
+    </div>
+  </div>
+
+  <div id="history-list">
+    <div id="history-empty">Noch keine Meditationen gespeichert.</div>
+  </div>
+</div>
+
+<!-- Einstellungen-Modal -->
+<div id="settings-modal" role="dialog" aria-modal="true" aria-label="Gong-Auswahl">
+  <div id="settings-backdrop" onclick="closeSettings()"></div>
+  <div id="settings-sheet">
+    <h2>Gong-Klang wählen</h2>
+
+    <div class="gong-option">
+      <div class="gong-option-left">
+        <div class="gong-radio selected" id="radio-deep" onclick="selectGong('deep')"></div>
+        <span class="gong-name">Tiefer Gong</span>
+      </div>
+      <button class="play-btn" onclick="previewGong('deep')" aria-label="Tiefen Gong abspielen">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+      </button>
+    </div>
+
+    <div class="gong-option">
+      <div class="gong-option-left">
+        <div class="gong-radio" id="radio-mid" onclick="selectGong('mid')"></div>
+        <span class="gong-name">Mittlerer Gong</span>
+      </div>
+      <button class="play-btn" onclick="previewGong('mid')" aria-label="Mittleren Gong abspielen">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+      </button>
+    </div>
+
+    <div class="gong-option">
+      <div class="gong-option-left">
+        <div class="gong-radio" id="radio-high" onclick="selectGong('high')"></div>
+        <span class="gong-name">Hoher Gong</span>
+      </div>
+      <button class="play-btn" onclick="previewGong('high')" aria-label="Hohen Gong abspielen">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+      </button>
+    </div>
+
+    <!-- Vorlauf -->
+    <div class="ctrl-header" style="margin-top:12px;">
+      <span class="ctrl-label">Vorlauf</span>
+      <span class="ctrl-value" id="vorlauf-value">10s</span>
+    </div>
+    <div class="slider-row" style="padding: 0 4px;">
+      <button class="slider-btn" onclick="adjustVorlauf(-5)" aria-label="Vorlauf verringern">−</button>
+      <input type="range" id="vorlauf-slider" min="0" max="60" value="10" step="5"
+             oninput="onVorlaufChange(this.value)" aria-label="Vorlaufzeit" />
+      <button class="slider-btn" onclick="adjustVorlauf(5)" aria-label="Vorlauf erhöhen">+</button>
+    </div>
+
+    <button id="settings-close" onclick="closeSettings()">Fertig</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════════════
+// AUTH — Login-Overlay Logik
+// ════════════════════════════════════════════════════════════════════════════
+
+const loginOverlay = document.getElementById('login-overlay');
+
+// Beim Start: Token aus localStorage lesen und beim Server verifizieren
+async function pruefeAuth() {
+  const token = localStorage.getItem('meditation_token');
+  if (!token) {
+    // Kein Token → Login anzeigen
+    zeigeLogin();
+    return;
+  }
+
+  try {
+    const antwort = await fetch('/api/auth/verify', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (antwort.ok) {
+      // Token gültig → App anzeigen
+      versteckeLogin();
+      // Letzte Einstellungen laden
+      await ladeEinstellungen();
+    } else {
+      // Token abgelaufen oder ungültig → Token löschen, Login anzeigen
+      localStorage.removeItem('meditation_token');
+      zeigeLogin();
+    }
+  } catch (err) {
+    // Netzwerkfehler → Login anzeigen
+    zeigeLogin();
+  }
+}
+
+function zeigeLogin() {
+  loginOverlay.classList.remove('hidden');
+}
+
+function versteckeLogin() {
+  loginOverlay.classList.add('hidden');
+}
+
+// Login-Formular absenden
+async function handleLogin(event) {
+  event.preventDefault();
+
+  const email    = document.getElementById('login-email').value.trim();
+  const passwort = document.getElementById('login-password').value;
+  const btn      = document.getElementById('login-btn');
+  const fehler   = document.getElementById('login-error');
+
+  fehler.textContent = '';
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btn.textContent = 'Anmelden';
+
+  try {
+    const antwort = await fetch('/api/auth/login', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ email, password: passwort })
+    });
+
+    const daten = await antwort.json();
+
+    if (antwort.ok) {
+      // Token im localStorage speichern
+      localStorage.setItem('meditation_token', daten.token);
+      // Login-Overlay ausblenden, App zeigen
+      versteckeLogin();
+      // Letzte Einstellungen laden
+      await ladeEinstellungen();
+    } else {
+      fehler.textContent = daten.error || 'Anmeldung fehlgeschlagen';
+    }
+  } catch (err) {
+    fehler.textContent = 'Verbindungsfehler. Bitte erneut versuchen.';
+  } finally {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    btn.textContent = 'Anmelden';
+  }
+}
+
+// Abmelden
+async function handleLogout() {
+  localStorage.removeItem('meditation_token');
+  // Cookie auch server-seitig löschen
+  await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
+  zeigeLogin();
+}
+
+// ── Einstellungen laden und speichern ────────────────────────────────────────
+
+async function ladeEinstellungen() {
+  const token = localStorage.getItem('meditation_token');
+  if (!token) return;
+  try {
+    const antwort = await fetch('/api/settings', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!antwort.ok) return;
+    const e = await antwort.json();
+
+    // Werte in die Slider übernehmen
+    durationSlider.value     = e.duration_minutes;
+    zwischengongSlider.max   = Math.max(1, e.duration_minutes - 1);
+    zwischengongSlider.value = Math.min(e.zwischengong_min, e.duration_minutes - 1);
+    vorlaufSlider.value      = e.vorlauf_seconds;
+
+    // Interne Variablen setzen
+    totalSeconds      = e.duration_minutes * 60;
+    remainingSeconds  = totalSeconds;
+    zwischengongMin   = parseInt(zwischengongSlider.value, 10);
+    vorlaufSeconds    = e.vorlauf_seconds;
+    selectedGong      = e.selected_gong;
+
+    // Anzeige aktualisieren
+    zwischengongValue.textContent = `${zwischengongMin}m`;
+    vorlaufValue.textContent      = vorlaufSeconds === 0 ? 'Aus' : `${vorlaufSeconds}s`;
+    selectGong(selectedGong, true); // kein Speicher-Request beim Laden
+    updateSliderFill(durationSlider);
+    updateSliderFill(zwischengongSlider);
+    updateSliderFill(vorlaufSlider);
+    updateDisplay();
+  } catch (err) {
+    // Fehler beim Laden → Standardwerte behalten
+  }
+}
+
+// Speichern mit kurzem Debounce (500ms), damit nicht bei jedem Slider-Tick ein Request geht
+let speichernTimeout = null;
+function speichereEinstellungen() {
+  clearTimeout(speichernTimeout);
+  speichernTimeout = setTimeout(async () => {
+    const token = localStorage.getItem('meditation_token');
+    if (!token) return;
+    await fetch('/api/settings', {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify({
+        duration_minutes: parseInt(durationSlider.value, 10),
+        zwischengong_min: zwischengongMin,
+        vorlauf_seconds:  vorlaufSeconds,
+        selected_gong:    selectedGong
+      })
+    }).catch(() => {});
+  }, 500);
+}
+
+// Auth-Check beim Laden der Seite
+pruefeAuth();
+
+
+// ════════════════════════════════════════════════════════════════════════════
+// MEDITATIONS-TIMER — unveränderte Logik aus der Original-App
+// ════════════════════════════════════════════════════════════════════════════
+
+// ── Zustand ──────────────────────────────────────────────────────────────
+let totalSeconds      = 30 * 60;
+let remainingSeconds  = totalSeconds;
+let zwischengongMin   = 15;
+let selectedGong      = 'deep';
+let timerInterval     = null;
+let isRunning         = false;
+let zwischengongFired = false;
+
+// Vorlauf
+let vorlaufSeconds   = 10;
+let vorlaufRemaining = 0;
+let isVorlauf        = false;
+let vorlaufInterval  = null;
+
+// Audio-Objekte vorladen
+const sounds = {
+  deep: new Audio('/sounds/Gong_deep.mp3'),
+  mid:  new Audio('/sounds/Gong_mid.mp3'),
+  high: new Audio('/sounds/Gong_high.mp3'),
+};
+
+Object.values(sounds).forEach(s => {
+  s.preload = 'auto';
+  s.load();
+});
+
+// Audio-Kontext entsperren – muss direkt beim Nutzer-Tap aufgerufen werden,
+// bevor ein Vorlauf/Timer mit Verzögerung startet.
+function unlockAudio() {
+  Object.values(sounds).forEach(snd => {
+    snd.muted = true;
+    snd.play().then(() => {
+      snd.pause();
+      snd.currentTime = 0;
+      snd.muted = false;
+    }).catch(() => {});
+  });
+}
+
+// ── DOM-Referenzen ────────────────────────────────────────────────────────
+const timerDisplay       = document.getElementById('timer-display');
+const gongBtn            = document.getElementById('gong-btn');
+const gongLabel          = document.getElementById('gong-label');
+const pauseControls      = document.getElementById('pause-controls');
+const durationSlider     = document.getElementById('duration-slider');
+const zwischengongSlider = document.getElementById('zwischengong-slider');
+const zwischengongValue  = document.getElementById('zwischengong-value');
+const progressRing       = document.getElementById('progress-ring');
+const gongFlash          = document.getElementById('gong-flash');
+const vorlaufSlider      = document.getElementById('vorlauf-slider');
+const vorlaufValue       = document.getElementById('vorlauf-value');
+const vorlaufNumber      = document.getElementById('vorlauf-number');
+
+const RING_CIRCUMFERENCE = 2 * Math.PI * 75;
+
+// ── Hilfsfunktionen ───────────────────────────────────────────────────────
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+}
+
+function updateSliderFill(slider) {
+  const min = parseFloat(slider.min);
+  const max = parseFloat(slider.max);
+  const val = parseFloat(slider.value);
+  const pct = ((val - min) / (max - min)) * 100;
+  slider.style.setProperty('--fill', `${pct}%`);
+}
+
+function updateProgressRing() {
+  const progress = 1 - (remainingSeconds / totalSeconds);
+  const offset   = RING_CIRCUMFERENCE * (1 - progress);
+  progressRing.style.strokeDashoffset = offset;
+}
+
+function updateDisplay() {
+  timerDisplay.textContent = formatTime(remainingSeconds);
+  updateProgressRing();
+}
+
+function playGong(type) {
+  const snd = sounds[type || selectedGong];
+  snd.currentTime = 0;
+  snd.play().catch(() => {});
+
+  gongFlash.classList.add('flash');
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      gongFlash.classList.remove('flash');
+    });
+  });
+}
+
+// ── Timer-Steuerung ───────────────────────────────────────────────────────
+
+function toggleTimer() {
+  if (isVorlauf) {
+    clearInterval(vorlaufInterval);
+    isVorlauf = false;
+    vorlaufNumber.classList.remove('show', 'fade');
+    vorlaufNumber.textContent = '';
+    gongBtn.classList.remove('running');
+    gongLabel.textContent = 'START';
+    durationSlider.disabled = false;
+    zwischengongSlider.disabled = false;
+    vorlaufSlider.disabled = false;
+  } else if (isRunning) {
+    pauseTimer();
+  } else {
+    unlockAudio(); // Audio-Kontext direkt beim Tap entsperren
+    startTimer();
+  }
+}
+
+function startTimer() {
+  if (remainingSeconds <= 0) resetTimer();
+
+  if (vorlaufSeconds > 0 && remainingSeconds === totalSeconds) {
+    startVorlauf();
+    return;
+  }
+
+  // Kein Vorlauf → Startgong direkt abspielen
+  if (remainingSeconds === totalSeconds) {
+    playGong(selectedGong);
+  }
+
+  startMeditation();
+}
+
+function startMeditation() {
+  isRunning = true;
+  gongBtn.classList.add('running');
+  // Pause-Controls verstecken, Gong-Label wieder zeigen
+  pauseControls.style.display = 'none';
+  gongLabel.style.display = '';
+  gongLabel.textContent = 'PAUSE';
+
+  durationSlider.disabled     = true;
+  zwischengongSlider.disabled = true;
+  vorlaufSlider.disabled      = true;
+
+  timerInterval = setInterval(tick, 1000);
+}
+
+// ── Vorlauf ───────────────────────────────────────────────────────────────
+
+function startVorlauf() {
+  isVorlauf        = true;
+  vorlaufRemaining = vorlaufSeconds;
+
+  gongLabel.textContent = 'VORLAUF';
+  gongBtn.classList.add('running');
+
+  durationSlider.disabled     = true;
+  zwischengongSlider.disabled = true;
+  vorlaufSlider.disabled      = true;
+
+  zeigeVorlaufZahl(vorlaufRemaining);
+  vorlaufInterval = setInterval(tickVorlauf, 1000);
+}
+
+function zeigeVorlaufZahl(n) {
+  vorlaufNumber.classList.remove('show', 'fade');
+  vorlaufNumber.textContent = n;
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      vorlaufNumber.classList.add('show');
+    });
+  });
+}
+
+function tickVorlauf() {
+  vorlaufRemaining--;
+
+  if (vorlaufRemaining <= 0) {
+    clearInterval(vorlaufInterval);
+    vorlaufNumber.classList.remove('show');
+    vorlaufNumber.classList.add('fade');
+
+    setTimeout(() => {
+      vorlaufNumber.textContent = '';
+      vorlaufNumber.classList.remove('fade');
+      isVorlauf = false;
+      playGong(selectedGong);
+      startMeditation();
+    }, 600);
+  } else {
+    vorlaufNumber.classList.remove('show');
+    vorlaufNumber.classList.add('fade');
+    setTimeout(() => {
+      zeigeVorlaufZahl(vorlaufRemaining);
+    }, 420);
+  }
+}
+
+function pauseTimer() {
+  isRunning = false;
+  clearInterval(timerInterval);
+  gongBtn.classList.remove('running');
+  // Gong-Label verstecken, Pause-Controls (Fortsetzen + Zurücksetzen) einblenden
+  gongLabel.style.display = 'none';
+  pauseControls.style.display = 'flex';
+}
+
+function resetTimer() {
+  clearInterval(timerInterval);
+  clearInterval(vorlaufInterval);
+  isRunning         = false;
+  isVorlauf         = false;
+  zwischengongFired = false;
+  remainingSeconds  = totalSeconds;
+
+  vorlaufNumber.textContent = '';
+  vorlaufNumber.classList.remove('show', 'fade');
+
+  gongBtn.classList.remove('running');
+  // Pause-Controls verstecken, Gong-Label wieder zeigen
+  pauseControls.style.display = 'none';
+  gongLabel.style.display = '';
+  gongLabel.textContent = 'START';
+  durationSlider.disabled     = false;
+  zwischengongSlider.disabled = false;
+  vorlaufSlider.disabled      = false;
+
+  updateDisplay();
+}
+
+function tick() {
+  if (remainingSeconds <= 0) {
+    playGong(selectedGong);
+    // Session als abgeschlossen speichern
+    speichereSession(Math.round(totalSeconds / 60), Math.round(totalSeconds / 60), true);
+    resetTimer();
+    return;
+  }
+
+  remainingSeconds--;
+  updateDisplay();
+
+  const elapsedMin = Math.floor((totalSeconds - remainingSeconds) / 60);
+  if (!zwischengongFired && elapsedMin >= zwischengongMin) {
+    zwischengongFired = true;
+    playGong(selectedGong);
+  }
+}
+
+// ── Slider-Handler ────────────────────────────────────────────────────────
+
+function onDurationChange(val) {
+  const minutes    = parseInt(val, 10);
+  totalSeconds     = minutes * 60;
+  remainingSeconds = totalSeconds;
+  zwischengongFired = false;
+
+  zwischengongSlider.max = Math.max(1, minutes - 1);
+  if (zwischengongMin >= minutes) {
+    zwischengongMin = Math.max(1, minutes - 1);
+    zwischengongSlider.value = zwischengongMin;
+    zwischengongValue.textContent = `${zwischengongMin}m`;
+    updateSliderFill(zwischengongSlider);
+  }
+
+  updateSliderFill(durationSlider);
+  updateDisplay();
+  speichereEinstellungen();
+}
+
+function onZwischengongChange(val) {
+  zwischengongMin = parseInt(val, 10);
+  zwischengongValue.textContent = `${zwischengongMin}m`;
+  zwischengongFired = false;
+  updateSliderFill(zwischengongSlider);
+  speichereEinstellungen();
+}
+
+function adjustDuration(delta) {
+  const cur  = parseInt(durationSlider.value, 10);
+  const next = Math.min(60, Math.max(1, cur + delta));
+  durationSlider.value = next;
+  onDurationChange(next);
+}
+
+function adjustZwischengong(delta) {
+  const cur  = parseInt(zwischengongSlider.value, 10);
+  const max  = parseInt(zwischengongSlider.max, 10);
+  const next = Math.min(max, Math.max(1, cur + delta));
+  zwischengongSlider.value = next;
+  onZwischengongChange(next);
+}
+
+function onVorlaufChange(val) {
+  vorlaufSeconds = parseInt(val, 10);
+  vorlaufValue.textContent = vorlaufSeconds === 0 ? 'Aus' : `${vorlaufSeconds}s`;
+  updateSliderFill(vorlaufSlider);
+  speichereEinstellungen();
+}
+
+function adjustVorlauf(delta) {
+  const cur  = parseInt(vorlaufSlider.value, 10);
+  const next = Math.min(60, Math.max(0, cur + delta));
+  vorlaufSlider.value = next;
+  onVorlaufChange(next);
+}
+
+// ── Einstellungen ─────────────────────────────────────────────────────────
+
+function openSettings() {
+  document.getElementById('settings-modal').classList.add('open');
+}
+
+function closeSettings() {
+  document.getElementById('settings-modal').classList.remove('open');
+}
+
+function selectGong(type, ohneSpichern = false) {
+  selectedGong = type;
+  ['deep', 'mid', 'high'].forEach(t => {
+    document.getElementById(`radio-${t}`).classList.toggle('selected', t === type);
+  });
+  if (!ohneSpichern) speichereEinstellungen();
+}
+
+function previewGong(type) {
+  playGong(type);
+}
+
+// ── History ───────────────────────────────────────────────────────────────
+
+function openHistory() {
+  const view = document.getElementById('history-view');
+  view.classList.add('open');
+  ladeHistory();
+}
+
+function closeHistory() {
+  document.getElementById('history-view').classList.remove('open');
+}
+
+async function ladeHistory() {
+  const token = localStorage.getItem('meditation_token');
+  if (!token) return;
+
+  try {
+    const res = await fetch('/api/sessions', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!res.ok) return;
+    const sessions = await res.json();
+    renderHistory(sessions);
+  } catch (e) {
+    console.error('Fehler beim Laden der Sessions:', e);
+  }
+}
+
+function renderHistory(sessions) {
+  // Stats berechnen
+  const totalMin = sessions.reduce((sum, s) => sum + (s.actual_minutes || 0), 0);
+  // Längste Tage-Serie berechnen
+  const tage = [...new Set(sessions.map(s => s.started_at.substring(0, 10)))].sort();
+  let maxStreak = 0, streak = 0;
+  for (let i = 0; i < tage.length; i++) {
+    if (i === 0) { streak = 1; }
+    else {
+      const prev = new Date(tage[i - 1]);
+      const cur  = new Date(tage[i]);
+      const diffDays = (cur - prev) / (1000 * 60 * 60 * 24);
+      streak = diffDays === 1 ? streak + 1 : 1;
+    }
+    if (streak > maxStreak) maxStreak = streak;
+  }
+
+  document.getElementById('stat-sessions').textContent = sessions.length;
+  document.getElementById('stat-minutes').textContent  = totalMin;
+  document.getElementById('stat-streak').textContent   = maxStreak;
+
+  const list = document.getElementById('history-list');
+  const empty = document.getElementById('history-empty');
+
+  if (sessions.length === 0) {
+    empty.style.display = '';
+    // Alte Session-Einträge entfernen
+    list.querySelectorAll('.session-item').forEach(el => el.remove());
+    return;
+  }
+
+  empty.style.display = 'none';
+  list.querySelectorAll('.session-item').forEach(el => el.remove());
+
+  sessions.forEach(s => {
+    const datum  = new Date(s.started_at);
+    const datStr = datum.toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' });
+    const timeStr = datum.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr';
+
+    const item = document.createElement('div');
+    item.className = 'session-item';
+    item.dataset.id = s.id;
+    item.innerHTML = `
+      <div class="session-info">
+        <div class="session-date">${datStr}</div>
+        <div class="session-detail">${timeStr} · ${s.planned_minutes} min geplant</div>
+      </div>
+      <span class="session-duration">${s.actual_minutes} min</span>
+      <button class="session-delete" onclick="loescheSession('${s.id}')" aria-label="Session löschen">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    `;
+    list.appendChild(item);
+  });
+}
+
+async function loescheSession(id) {
+  const token = localStorage.getItem('meditation_token');
+  if (!token) return;
+
+  try {
+    const res = await fetch('/api/sessions/' + id, {
+      method: 'DELETE',
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    if (!res.ok) return;
+
+    // Eintrag sofort aus der Liste entfernen
+    const item = document.querySelector(`.session-item[data-id="${id}"]`);
+    if (item) item.remove();
+
+    // Stats neu berechnen: alle verbleibenden Sessions neu laden
+    ladeHistory();
+  } catch (e) {
+    console.error('Fehler beim Löschen der Session:', e);
+  }
+}
+
+async function speichereSession(plannedMin, actualMin, completed) {
+  const token = localStorage.getItem('meditation_token');
+  if (!token) return;
+
+  try {
+    await fetch('/api/sessions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token
+      },
+      body: JSON.stringify({
+        planned_minutes: plannedMin,
+        actual_minutes:  actualMin,
+        completed:       completed
+      })
+    });
+  } catch (e) {
+    console.error('Fehler beim Speichern der Session:', e);
+  }
+}
+
+// ── Initialisierung ───────────────────────────────────────────────────────
+
+function init() {
+  updateSliderFill(durationSlider);
+  updateSliderFill(zwischengongSlider);
+  updateSliderFill(vorlaufSlider);
+  updateDisplay();
+  zwischengongValue.textContent = `${zwischengongMin}m`;
+  vorlaufValue.textContent      = `${vorlaufSeconds}s`;
+}
+
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+/* Login-Seite Styles */
+.login-page {
+    min-height: 100vh;
+    min-height: 100dvh; /* Dynamische Viewport-Höhe für iPhone */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    background: var(--bg-primary);
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    background: var(--bg-secondary);
+    border-radius: 16px;
+    padding: 32px 24px;
+    border: 1px solid var(--border);
+}
+
+.login-logo {
+    text-align: center;
+    margin-bottom: 32px;
+}
+
+.login-logo span {
+    font-size: 48px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.login-logo h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 8px;
+}
+
+.login-logo p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.input-group label {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.input-group input {
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 16px; /* 16px verhindert Auto-Zoom auf iPhone */
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.input-group input:focus {
+    border-color: var(--accent);
+}
+
+.error-message {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 14px;
+    color: #ef4444;
+}
+
+.toggle-mode {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 14px;
+    padding: 16px 0 0;
+    cursor: pointer;
+    width: 100%;
+    text-align: center;
+}

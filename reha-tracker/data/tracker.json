@@ -1,0 +1,235 @@
+{
+  "eintraege": [
+    {
+      "id": 1774340341208,
+      "datum": "2026-03-24T00:00:00.000Z",
+      "schmerz": 2,
+      "ort": "Nacken",
+      "stimmung": "gut",
+      "notiz": ""
+    },
+    {
+      "id": 1774213799468,
+      "datum": "2026-03-22T00:00:00.000Z",
+      "schmerz": 1,
+      "ort": "Hüfte",
+      "stimmung": "gut",
+      "notiz": ""
+    }
+  ],
+  "uebungen": [
+    {
+      "id": 1774181339007,
+      "name": "Arme schwenken vor & zurück",
+      "wiederholungen": 15,
+      "zyklen": 3,
+      "minuten": 5,
+      "notiz": ""
+    },
+    {
+      "id": 1774181354671,
+      "name": "Arme schwenken vor dem Körper",
+      "wiederholungen": 10,
+      "zyklen": 3,
+      "minuten": 5,
+      "notiz": ""
+    },
+    {
+      "id": 1774181375666,
+      "name": "Arme hinter dem Rücken v. unten n. oben",
+      "wiederholungen": 10,
+      "zyklen": 3,
+      "minuten": 5,
+      "notiz": ""
+    },
+    {
+      "id": 1774181397510,
+      "name": "Arme schwenken in der Drehung",
+      "wiederholungen": null,
+      "zyklen": null,
+      "minuten": null,
+      "notiz": ""
+    },
+    {
+      "id": 1774181463535,
+      "name": "Hände seitl. & mittig am Kopf zw. Schulterblätter, Ellenbogen nach oben",
+      "wiederholungen": null,
+      "zyklen": null,
+      "minuten": null,
+      "notiz": ""
+    },
+    {
+      "id": 1774181498523,
+      "name": "Rückenlage, Arme neben Körper, Ferse am Boden heranziehen",
+      "wiederholungen": null,
+      "zyklen": null,
+      "minuten": null,
+      "notiz": ""
+    },
+    {
+      "id": 1774181536340,
+      "name": "Rückenlage, gesundes Bein z. Oberkörper, OP Bein strecken",
+      "wiederholungen": null,
+      "zyklen": null,
+      "minuten": null,
+      "notiz": ""
+    },
+    {
+      "id": 1774181575322,
+      "name": "Rückenlage, Bein abspreizen, Zehen nach oben",
+      "wiederholungen": null,
+      "zyklen": null,
+      "minuten": null,
+      "notiz": ""
+    },
+    {
+      "id": 1774213518343,
+      "name": "Rücklage, arme neben dem Körper, Beine anstellen und zumrechten Winkel anheben",
+      "wiederholungen": 20,
+      "zyklen": 3,
+      "minuten": null,
+      "notiz": ""
+    },
+    {
+      "id": 1774213569824,
+      "name": "Rücklage, Arme neben dem Körper, beide Beine anstellen, Gesäß nach oben",
+      "wiederholungen": 20,
+      "zyklen": 3,
+      "minuten": null,
+      "notiz": ""
+    },
+    {
+      "id": 1774213630065,
+      "name": "Sitzen auf Stuhl, 90° angewinkelt, Unterschenkel und Oberschenkel in eine Ebene bringen, Unterschenkel hoch",
+      "wiederholungen": 20,
+      "zyklen": 3,
+      "minuten": null,
+      "notiz": ""
+    },
+    {
+      "id": 1774213662446,
+      "name": "Sitzen auf Stuhl. Aufstehen, gerade Körperhaltung, Hüfte gedehnt.",
+      "wiederholungen": 20,
+      "zyklen": 3,
+      "minuten": null,
+      "notiz": ""
+    },
+    {
+      "id": 1774213695308,
+      "name": "Liegestütze an der Wand",
+      "wiederholungen": 15,
+      "zyklen": 3,
+      "minuten": null,
+      "notiz": ""
+    },
+    {
+      "id": 1774257664519,
+      "name": "Stand , Knie 90 grad hochziehen",
+      "wiederholungen": 15,
+      "zyklen": 3,
+      "minuten": null,
+      "notiz": ""
+    },
+    {
+      "id": 1774257722661,
+      "name": "Stand, seitlich grätschen",
+      "wiederholungen": 10,
+      "zyklen": 3,
+      "minuten": null,
+      "notiz": ""
+    }
+  ],
+  "termine": [
+    {
+      "id": 1774252318536,
+      "titel": "Fahrradegometer",
+      "datum": "2026-03-23",
+      "uhrzeit": "19:00",
+      "ort": "Große Halle",
+      "notiz": "AHB 4-6, Pedal, vier Höhe, neun Schwierigkeit, acht. 30 Minuten"
+    }
+  ],
+  "sets": [
+    {
+      "id": 1774181605070,
+      "name": "Ritas Übungs-Set",
+      "uebungsIds": [
+        1774181339007,
+        1774181354671,
+        1774181375666,
+        1774181397510,
+        1774181463535,
+        1774181498523,
+        1774181536340,
+        1774181575322
+      ]
+    },
+    {
+      "id": 1774257803983,
+      "name": "Tagsüber nebenher",
+      "uebungsIds": [
+        1774257722661,
+        1774257664519,
+        1774213630065,
+        1774213662446
+      ]
+    }
+  ],
+  "sessions": [
+    {
+      "id": 1774213435384,
+      "datum": "2026-03-22T21:03:00.000Z",
+      "setId": 1774181605070,
+      "ergebnisse": [
+        {
+          "uebungId": 1774181339007,
+          "status": "teilweise",
+          "istWert": 20,
+          "notiz": ""
+        },
+        {
+          "uebungId": 1774181354671,
+          "status": "teilweise",
+          "istWert": 20,
+          "notiz": ""
+        },
+        {
+          "uebungId": 1774181375666,
+          "status": "teilweise",
+          "istWert": 20,
+          "notiz": ""
+        },
+        {
+          "uebungId": 1774181397510,
+          "status": "teilweise",
+          "istWert": 20,
+          "notiz": ""
+        },
+        {
+          "uebungId": 1774181463535,
+          "status": "teilweise",
+          "istWert": 20,
+          "notiz": ""
+        },
+        {
+          "uebungId": 1774181498523,
+          "status": "teilweise",
+          "istWert": 20,
+          "notiz": ""
+        },
+        {
+          "uebungId": 1774181536340,
+          "status": "teilweise",
+          "istWert": 20,
+          "notiz": ""
+        },
+        {
+          "uebungId": 1774181575322,
+          "status": "teilweise",
+          "istWert": 20,
+          "notiz": ""
+        }
+      ]
+    }
+  ]
+}

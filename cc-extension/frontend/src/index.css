@@ -1,0 +1,85 @@
+/* Globale Styles – Dark Mode als Standard */
+
+/* CSS-Variablen für Farben – einmal definiert, überall nutzbar */
+:root {
+    --bg-primary: #000000;      /* Reines Schwarz – Haupthintergrund */
+    --bg-secondary: #141414;    /* Dunkelgrau für Header, Footer, Sidebar */
+    --bg-tertiary: #1e1e1e;     /* Etwas heller (Inputs, hover) */
+    --text-primary: #f9fafb;    /* Fast weiß für wichtige Texte */
+    --text-secondary: #9ca3af;  /* Grau für Nebeninfos */
+    --border: #2a2a2a;          /* Rahmenlinien */
+    --accent: #6366f1;          /* Indigo-Akzentfarbe */
+
+    /* Schriftart: System-Standard – schnell, schön auf iPhone */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Reset: Browser-Abstände entfernen */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+/* Verhindert horizontales Scrollen/Layout-Verschieben auf iPhone */
+html {
+    overflow-x: hidden;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    /* Verhindert ungewolltes Mitscrollen auf iPhone */
+    overscroll-behavior: none;
+    /* Verhindert dass langer Text das Layout breiter als den Viewport macht */
+    overflow-x: hidden;
+}
+
+/* Root-Container: Volle Höhe, kein Überlauf */
+#root {
+    height: 100vh;
+    height: 100dvh; /* Dynamische Viewport-Höhe – korrekte Höhe auf iPhone */
+    overflow: hidden;
+}
+
+/* Allgemeine Button-Styles */
+button {
+    cursor: pointer;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+/* Allgemeiner Primär-Button */
+.btn-primary {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    min-height: 50px;
+    cursor: pointer;
+    width: 100%;
+    transition: opacity 0.15s;
+}
+
+.btn-primary:disabled {
+    opacity: 0.5;
+}
+
+/* Scrollbar ausblenden (sieht auf iPhone sauberer aus) */
+::-webkit-scrollbar {
+    width: 4px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 2px;
+}

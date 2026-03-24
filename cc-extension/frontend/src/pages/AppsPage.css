@@ -1,0 +1,176 @@
+/* Apps-Seite Styles */
+.apps-page {
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: var(--bg-primary);
+    display: flex;
+    flex-direction: column;
+}
+
+.apps-header {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    /* env(safe-area-inset-top) = Abstand unter iPhone-Statusleiste (Uhrzeit, Akku etc.) */
+    padding-top: max(16px, env(safe-area-inset-top));
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    gap: 12px;
+    min-height: 56px;
+}
+
+/* Refresh-Button rechts im Header */
+.btn-refresh {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: var(--accent);
+    cursor: pointer;
+    padding: 8px;
+    min-height: 44px;
+    min-width: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.btn-refresh:active {
+    background: var(--bg-primary);
+}
+
+/* Dreh-Animation beim Aktualisieren */
+.btn-refresh.dreht svg {
+    animation: drehen 0.6s linear;
+}
+
+@keyframes drehen {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+/* Zeitstempel unter dem Header */
+.apps-aktualisiert {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 6px 16px;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    opacity: 0.7;
+}
+
+.btn-back {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 16px;
+    cursor: pointer;
+    padding: 8px;
+    min-height: 44px;
+    white-space: nowrap;
+}
+
+.apps-header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.apps-content {
+    flex: 1;
+    padding: 16px;
+}
+
+.loading-text {
+    color: var(--text-secondary);
+    text-align: center;
+    padding: 32px;
+}
+
+.apps-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 16px;
+    text-align: center;
+    gap: 8px;
+    color: var(--text-secondary);
+}
+
+.apps-empty span {
+    font-size: 48px;
+    margin-bottom: 8px;
+}
+
+.apps-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.app-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.app-icon {
+    font-size: 32px;
+    flex-shrink: 0;
+}
+
+.app-info {
+    flex: 1;
+}
+
+.app-info h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 4px;
+}
+
+.app-status {
+    font-size: 13px;
+    margin: 0 0 8px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Kleiner farbiger Punkt als Statusanzeige */
+.status-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.status-dot.running {
+    background: #34c759;
+    box-shadow: 0 0 4px rgba(52, 199, 89, 0.5);
+}
+
+.status-dot.stopped {
+    background: #ff3b30;
+}
+
+.app-link {
+    display: inline-block;
+    color: var(--accent);
+    font-size: 14px;
+    text-decoration: none;
+    padding: 8px 0;
+    min-height: 44px;
+    line-height: 28px;
+}

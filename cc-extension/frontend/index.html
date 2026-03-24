@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Damit die Seite auf dem iPhone korrekt dargestellt wird -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+    <!-- PWA-Metadaten: ermöglicht "Zum Homescreen hinzufügen" auf dem iPhone -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="CC Extension" />
+    <meta name="theme-color" content="#000000" />
+
+    <!-- PWA-Manifest verlinken -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- App-Icon für iPhone Homescreen -->
+    <link rel="apple-touch-icon" href="/icon-192.png" />
+
+    <title>CC Extension</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    <!-- Service Worker registrieren (ermöglicht Offline-Nutzung + Auto-Reload bei Updates) -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js').then((registration) => {
+          // Auf neue Service Worker Version prüfen
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            if (newWorker) {
+              newWorker.addEventListener('statechange', () => {
+                // Nur neu laden wenn bereits ein Controller aktiv war (kein Erst-Install)
+                if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
+                  window.location.reload();
+                }
+              });
+            }
+          });
+        }).catch(console.error);
+
+        // Auch auf direkte Nachrichten vom SW reagieren
+        navigator.serviceWorker.addEventListener('message', (event) => {
+          if (event.data && event.data.type === 'SW_UPDATED' && navigator.serviceWorker.controller) {
+            window.location.reload();
+          }
+        });
+      }
+    </script>
+  </body>
+</html>

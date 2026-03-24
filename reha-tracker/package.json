@@ -1,0 +1,12 @@
+{
+  "name": "reha-tracker",
+  "version": "1.0.0",
+  "description": "Reha Tracker - Rehabilitation Fortschritt verfolgen",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
