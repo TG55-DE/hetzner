@@ -36,7 +36,7 @@ setInterval(() => {
 const CLAUDE_PATH = process.env.CLAUDE_PATH || '/home/timo_hahn/.local/bin/claude';
 
 // Standard-Arbeitsverzeichnis für allgemeine Prompts
-const DEFAULT_WORK_DIR = process.env.CLAUDE_WORK_DIR || '/home/timo_hahn/Timos_CC_Projekte';
+const DEFAULT_WORK_DIR = process.env.CLAUDE_WORK_DIR || '/home/timo_hahn/Timos_CC_Projekte/Projects';
 
 /**
  * Speichert Bild-Anhänge (base64) als temporäre Dateien auf dem VPS.

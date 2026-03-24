@@ -1,7 +1,7 @@
 #!/bin/bash
 # Deploy-Script für CC Extension
 set -e
-cd /home/timo_hahn/Timos_CC_Projekte/cc-extension
+cd /home/timo_hahn/Timos_CC_Projekte/Projects/cc-extension
 
 echo "=== CC Extension Deploy ==="
 

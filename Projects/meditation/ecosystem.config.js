@@ -1,13 +1,13 @@
-// PM2 Konfiguration – Reha Tracker
+// PM2 Konfiguration – Meditation App
 // Port und Name sind hier fest gesperrt – NIEMALS ändern ohne APPS.md zu prüfen
 module.exports = {
   apps: [
     {
-      name: 'reha-tracker',
+      name: 'meditation-app',
       script: 'server.js',
-      cwd: '/home/timo_hahn/Timos_CC_Projekte/reha-tracker',
+      cwd: '/home/timo_hahn/Timos_CC_Projekte/Projects/meditation',
       env: {
-        PORT: 3002,
+        PORT: 3001,
         NODE_ENV: 'production'
       }
     }

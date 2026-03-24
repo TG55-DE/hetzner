@@ -8,7 +8,7 @@ module.exports = {
             // ---- Backend-Server ----
             name: 'cc-extension-backend',
             script: 'src/index.js',
-            cwd: '/home/timo_hahn/Timos_CC_Projekte/cc-extension/backend',
+            cwd: '/home/timo_hahn/Timos_CC_Projekte/Projects/cc-extension/backend',
 
             // Automatisch neustarten wenn der Prozess abstürzt
             autorestart: true,
@@ -24,8 +24,8 @@ module.exports = {
             },
 
             // Logs in den logs-Ordner schreiben
-            output: '/home/timo_hahn/Timos_CC_Projekte/hetzner/logs/backend.log',
-            error:  '/home/timo_hahn/Timos_CC_Projekte/hetzner/logs/backend-error.log',
+            output: '/home/timo_hahn/Timos_CC_Projekte/logs/backend.log',
+            error:  '/home/timo_hahn/Timos_CC_Projekte/logs/backend-error.log',
             log_date_format: 'YYYY-MM-DD HH:mm:ss',
 
             // Wartezeit zwischen Neustarts
@@ -35,7 +35,7 @@ module.exports = {
             // ---- Deployment-Worker ----
             name: 'cc-extension-worker',
             script: 'src/worker-process.js',
-            cwd: '/home/timo_hahn/Timos_CC_Projekte/cc-extension/backend',
+            cwd: '/home/timo_hahn/Timos_CC_Projekte/Projects/cc-extension/backend',
 
             autorestart: true,
             watch: false,
@@ -45,8 +45,8 @@ module.exports = {
                 NODE_ENV: 'production',
             },
 
-            output: '/home/timo_hahn/Timos_CC_Projekte/hetzner/logs/worker.log',
-            error:  '/home/timo_hahn/Timos_CC_Projekte/hetzner/logs/worker-error.log',
+            output: '/home/timo_hahn/Timos_CC_Projekte/logs/worker.log',
+            error:  '/home/timo_hahn/Timos_CC_Projekte/logs/worker-error.log',
             log_date_format: 'YYYY-MM-DD HH:mm:ss',
 
             restart_delay: 3000,

@@ -21,6 +21,7 @@ App-Ordner, bevor du an einer App arbeitest.
 
 ## Projekt
 - Hauptordner: /home/timo_hahn/Timos_CC_Projekte/
+- Projektordner: /home/timo_hahn/Timos_CC_Projekte/Projects/
 - Server IP: 91.99.56.96
 - Ports beginnen ab 3000
 - Sprache/Framework: Dynamisch je nach Bedarf wählen (React, Vanilla JS, etc.)
@@ -97,7 +98,7 @@ git commit -am "Fix: Viewport-Höhe auf iPhone korrigiert"
 
 ### Checkliste für neue Apps (Reihenfolge einhalten!)
 1. **Port bestimmen:** Nächsten freien Port aus der Port-Übersicht wählen
-2. **Ordner erstellen:** ~/Timos_CC_Projekte/[app-name]/
+2. **Ordner erstellen:** ~/Timos_CC_Projekte/Projects/[app-name]/
 3. **Technologie wählen:** Einfache App → Vanilla HTML/JS + Express. Komplexe App → React + Express.
 4. **App entwickeln:** Mobile-first, Touch-optimiert, PWA-fähig (siehe PWA-Anforderungen)
 5. **ecosystem.config.js erstellen:** PM2-Konfiguration mit festem Port und cwd-Pfad
@@ -116,7 +117,7 @@ module.exports = {
   apps: [{
     name: '[app-name]',
     script: 'server.js',
-    cwd: '/home/timo_hahn/Timos_CC_Projekte/[app-name]',
+    cwd: '/home/timo_hahn/Timos_CC_Projekte/Projects/[app-name]',
     env: {
       PORT: [zugewiesener-port],
       NODE_ENV: 'production'
@@ -172,8 +173,8 @@ Caddy danach neu laden: `sudo systemctl reload caddy`
 WICHTIG: Den fertigen Link als https://91.99.56.96:[https-port] zurückgeben.
 
 ### Ordnerstruktur
-1. Jede neue App bekommt einen eigenen Ordner unter ~/Timos_CC_Projekte/
-2. Der Ordnername wird vom User bestimmt oder aus dem App-Namen abgeleitet (z.B. "Meditation" → ~/Timos_CC_Projekte/meditation/)
+1. Jede neue App bekommt einen eigenen Ordner unter ~/Timos_CC_Projekte/Projects/
+2. Der Ordnername wird vom User bestimmt oder aus dem App-Namen abgeleitet (z.B. "Meditation" → ~/Timos_CC_Projekte/Projects/meditation/)
 3. NIEMALS eine bestehende App überschreiben oder in einen bestehenden Ordner deployen ohne explizite Bestätigung
 4. Jede App bekommt einen eigenen Port (3001, 3002, 3003 etc.) — NIEMALS den Port einer bestehenden App verwenden
 
@@ -192,22 +193,25 @@ WICHTIG: Den fertigen Link als https://91.99.56.96:[https-port] zurückgeben.
 ### Port-Übersicht (aktuell halten!)
 | App | Ordner | Port intern | HTTPS-Port (Caddy) | URL |
 |-----|--------|-------------|--------------------|----|
-| CC Extension | cc-extension/ | 3000 | 443 | https://91.99.56.96 |
-| Meditation | meditation/ | 3001 | 8443 | https://91.99.56.96:8443 |
-| Reha-Tracker | reha-tracker/ | 3002 | 9443 | https://91.99.56.96:9443 |
-| [nächste App] | | 3003 | 10443 | |
+| CC Extension | Projects/cc-extension/ | 3000 | 443 | https://91.99.56.96 |
+| Meditation | Projects/meditation/ | 3001 | 8443 | https://91.99.56.96:8443 |
+| Reha-Tracker | Projects/reha-tracker/ | 3002 | 9443 | https://91.99.56.96:9443 |
+| [nächste App] | Projects/ | 3003 | 10443 | |
 
 PM2-Namen: cc-extension-backend, cc-extension-worker, meditation-app, reha-tracker
 Aktualisiere diese Liste bei jeder neuen App.
 
 ## Ordnerstruktur (WICHTIG – NICHT duplizieren!)
-Jede App hat GENAU EINEN Ordner direkt unter ~/Timos_CC_Projekte/:
+Alle Apps liegen unter ~/Timos_CC_Projekte/Projects/:
 ```
 ~/Timos_CC_Projekte/
-├── cc-extension/       ← Port 3000
-├── meditation/         ← Port 3001
-├── reha-tracker/       ← Port 3002
-└── CLAUDE.md
+├── CLAUDE.md              ← Globale Regeln
+├── scripts/               ← Deploy + Backup
+├── backups/               ← DB-Dumps
+└── Projects/
+    ├── cc-extension/      ← Port 3000 (eigene CLAUDE.md)
+    ├── meditation/        ← Port 3001 (eigene CLAUDE.md)
+    └── reha-tracker/      ← Port 3002 (eigene CLAUDE.md)
 ```
 Es gibt KEINE Unterordner wie deployments/ oder hetzner/.
 NIEMALS eine bestehende App in einen neuen Ordner kopieren oder

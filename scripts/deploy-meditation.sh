@@ -1,7 +1,7 @@
 #!/bin/bash
 # Deploy-Script für Meditation
 set -e
-cd /home/timo_hahn/Timos_CC_Projekte/meditation
+cd /home/timo_hahn/Timos_CC_Projekte/Projects/meditation
 
 echo "=== Meditation Deploy ==="
 

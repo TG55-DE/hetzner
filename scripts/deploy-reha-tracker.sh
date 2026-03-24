@@ -1,7 +1,7 @@
 #!/bin/bash
 # Deploy-Script für Reha-Tracker
 set -e
-cd /home/timo_hahn/Timos_CC_Projekte/reha-tracker
+cd /home/timo_hahn/Timos_CC_Projekte/Projects/reha-tracker
 
 echo "=== Reha-Tracker Deploy ==="
 
