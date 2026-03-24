@@ -149,7 +149,7 @@ const server = http.createServer(app);
 setupWebSocket(server);
 
 // Server starten
-server.listen(PORT, '0.0.0.0', () => {
+server.listen(PORT, '127.0.0.1', () => {
     log(`CC Extension Backend läuft auf Port ${PORT}`);
     log(`API verfügbar unter: https://91.99.56.96/api`);
 });

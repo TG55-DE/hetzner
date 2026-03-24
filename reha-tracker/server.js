@@ -229,7 +229,7 @@ app.get('*', (req, res) => {
 });
 
 // Server starten
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, '127.0.0.1', () => {
   console.log(`Reha Tracker läuft auf Port ${PORT}`);
-  console.log(`Erreichbar unter: http://91.99.56.96:${PORT}`);
+  console.log(`Erreichbar unter: https://91.99.56.96:9443`);
 });

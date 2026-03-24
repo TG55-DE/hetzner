@@ -9,6 +9,9 @@ fahre fort.
 Einzige Ausnahme: Wenn nicht klar ist welche PWA betroffen ist –
 siehe Abschnitt "Projektzuordnung".
 
+**WICHTIG:** Lies IMMER die projekt-spezifische CLAUDE.md im jeweiligen
+App-Ordner, bevor du an einer App arbeitest.
+
 ## Kontext: Wie der Nutzer arbeitet
 - Der Nutzer steuert Claude Code **vom iPhone** über die CC Extension (PWA auf Port 3000)
 - Prompts kommen als Chat-Nachrichten, Antworten müssen prägnant sein
@@ -28,6 +31,8 @@ siehe Abschnitt "Projektzuordnung".
 - Reverse Proxy: Caddy (läuft als root, leitet HTTPS an localhost-Ports weiter)
 - Datenbank: PostgreSQL 16 (für CC Extension)
 - Cache: Redis (für CC Extension)
+- Sicherheit: ufw aktiv, nur Ports 22/80/443/8443/9443 offen
+- Alle Apps binden an 127.0.0.1 (nur über Caddy erreichbar)
 
 ## Projektzuordnung
 Bevor du mit einer Änderung oder Erweiterung beginnst, stelle sicher
@@ -134,6 +139,21 @@ Jede App muss als Progressive Web App funktionieren (zum iPhone-Homescreen hinzu
    ```
 4. **Touch-optimiert:** Mindestens 44x44px Tap-Targets, keine Hover-Abhängigkeiten
 5. **Safe Areas beachten:** padding-top: env(safe-area-inset-top) für iPhone-Notch
+6. **iOS Input-Zoom verhindern** (in globales CSS):
+   ```css
+   @supports (-webkit-touch-callout: none) {
+     input, textarea, select { font-size: 16px !important; }
+   }
+   ```
+7. **iOS PWA Standalone Viewport-Fix** (im HTML, nach App-Root):
+   ```html
+   <style>
+     @media (display-mode: standalone) {
+       html { height: calc(100% + env(safe-area-inset-top)); overflow: hidden; }
+       body { position: relative !important; height: 100% !important; }
+     }
+   </style>
+   ```
 
 ### Caddy-Regeln (HTTPS für ALLE Apps)
 Jede neue App bekommt einen eigenen HTTPS-Eintrag in der Caddyfile.
@@ -170,10 +190,14 @@ WICHTIG: Den fertigen Link als https://91.99.56.96:[https-port] zurückgeben.
 3. Wenn ein Build fehlschlägt: Den alten Stand NICHT löschen, sondern den Fehler melden und den letzten funktionierenden Stand beibehalten
 
 ### Port-Übersicht (aktuell halten!)
-- Port 3000: CC Extension Backend (Ordner: cc-extension/, PM2: cc-extension-backend + cc-extension-worker)
-- Port 3001: Meditation App (Ordner: meditation/, PM2: meditation-app)
-- Port 3002: Reha-Tracker (Ordner: reha-tracker/, PM2: reha-tracker)
-- Port 3003: [frei – nächste neue App]
+| App | Ordner | Port intern | HTTPS-Port (Caddy) | URL |
+|-----|--------|-------------|--------------------|----|
+| CC Extension | cc-extension/ | 3000 | 443 | https://91.99.56.96 |
+| Meditation | meditation/ | 3001 | 8443 | https://91.99.56.96:8443 |
+| Reha-Tracker | reha-tracker/ | 3002 | 9443 | https://91.99.56.96:9443 |
+| [nächste App] | | 3003 | 10443 | |
+
+PM2-Namen: cc-extension-backend, cc-extension-worker, meditation-app, reha-tracker
 Aktualisiere diese Liste bei jeder neuen App.
 
 ## Ordnerstruktur (WICHTIG – NICHT duplizieren!)

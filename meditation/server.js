@@ -238,6 +238,6 @@ app.get('*', (req, res) => {
 });
 
 // ── Server starten ───────────────────────────────────────────────────────────
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Meditation App läuft auf http://91.99.56.96:${PORT}`);
+app.listen(PORT, '127.0.0.1', () => {
+  console.log(`Meditation App läuft auf http://127.0.0.1:${PORT}`);
 });

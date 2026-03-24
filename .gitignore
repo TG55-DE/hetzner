@@ -3,3 +3,5 @@ node_modules/
 *.log
 logs/
 .DS_Store
+backups/*.sql.gz
+backups/backup.log
