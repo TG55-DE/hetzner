@@ -1,0 +1,13 @@
+{
+  "name": "bomberman",
+  "version": "1.0.0",
+  "description": "Bomberman PWA – SNES-Stil, Mobile-First",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "postinstall": "node scripts/generate-icons.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
