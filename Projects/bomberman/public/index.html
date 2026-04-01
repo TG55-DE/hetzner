@@ -11,317 +11,107 @@
   <link rel="apple-touch-icon" href="/icon-192.png">
   <title>Bomberman</title>
   <style>
-    * {
-      box-sizing: border-box; margin: 0; padding: 0;
-      -webkit-tap-highlight-color: transparent;
-      -webkit-user-select: none;
-      user-select: none;
-    }
+    * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; -webkit-user-select:none; user-select:none; }
+    html,body { width:100%; height:100%; background:#19143c; overflow:hidden; touch-action:none; }
 
-    html, body {
-      width: 100%; height: 100%;
-      background: #19143c;
-      overflow: hidden;
-      touch-action: none;
-    }
+    #app { display:flex; flex-direction:column; width:100%; height:100dvh; height:100vh; padding-top:env(safe-area-inset-top); padding-bottom:env(safe-area-inset-bottom); }
 
-    #app {
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      height: 100dvh;
-      height: 100vh;
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
-    }
+    /* HUD */
+    #hud { flex-shrink:0; height:48px; background:#0d0a22; display:flex; align-items:center; justify-content:space-between; padding:0 84px 0 8px; font-family:'Courier New',monospace; color:#fff; font-size:13px; border-bottom:2px solid #3a2f7a; gap:4px; }
+    #hud-score { color:#ffd740; min-width:70px; }
+    #hud-lives { color:#ff8a80; flex:1; text-align:center; letter-spacing:4px; font-size:16px; }
 
-    /* Status-Leiste */
-    #hud {
-      flex-shrink: 0;
-      height: 48px;
-      background: #0d0a22;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 84px 0 8px;
-      font-family: 'Courier New', monospace;
-      color: #fff;
-      font-size: 13px;
-      border-bottom: 2px solid #3a2f7a;
-      gap: 4px;
-    }
-    #hud-score { color: #ffd740; min-width: 70px; }
-    #hud-lives { color: #ff8a80; flex: 1; text-align: center; letter-spacing: 4px; font-size: 16px; }
+    /* Pause-Button */
+    #btn-pause { position:fixed; top:calc(env(safe-area-inset-top) + 5px); right:8px; z-index:50; width:64px; height:38px; background:#4a1a8a; border:2px solid #9a60ff; border-radius:8px; color:#fff; font-size:12px; font-family:'Courier New',monospace; font-weight:bold; display:flex; align-items:center; justify-content:center; gap:5px; cursor:pointer; touch-action:manipulation; box-shadow:0 0 10px rgba(154,96,255,0.7); letter-spacing:0.5px; }
+    .pause-icon { display:flex; gap:3px; align-items:center; }
+    .pause-icon span { display:block; width:4px; height:14px; background:#fff; border-radius:1px; }
+    #btn-pause:active { background:#7a40cc; transform:scale(0.95); }
+    #btn-pause.hidden { display:none; }
 
-    #btn-pause {
-      position: fixed;
-      top: calc(env(safe-area-inset-top) + 5px);
-      right: 8px;
-      z-index: 50;
-      width: 64px; height: 38px;
-      background: #4a1a8a;
-      border: 2px solid #9a60ff;
-      border-radius: 8px;
-      color: #fff;
-      font-size: 12px;
-      font-family: 'Courier New', monospace;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-      cursor: pointer;
-      touch-action: manipulation;
-      box-shadow: 0 0 10px rgba(154, 96, 255, 0.7);
-      letter-spacing: 0.5px;
-    }
-    /* Pixel-Pause-Icon: zwei vertikale Balken */
-    .pause-icon {
-      display: flex;
-      gap: 3px;
-      align-items: center;
-    }
-    .pause-icon span {
-      display: block;
-      width: 4px; height: 14px;
-      background: #fff;
-      border-radius: 1px;
-    }
-    #btn-pause:active { background: #7a40cc; transform: scale(0.95); }
-    #btn-pause.hidden { display: none; }
-
-    /* Canvas-Bereich */
-    #canvas-wrap {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      background: #19143c;
-      min-height: 0;
-    }
-
-    canvas {
-      display: block;
-      width: 100%;
-      max-width: 390px;
-      height: auto;
-      image-rendering: pixelated;
-      image-rendering: crisp-edges;
-    }
+    /* Canvas */
+    #canvas-wrap { flex:1; display:flex; align-items:center; justify-content:center; overflow:hidden; background:#19143c; min-height:0; }
+    canvas { display:block; width:100%; max-width:390px; height:auto; image-rendering:pixelated; image-rendering:crisp-edges; }
 
     /* Steuerung */
-    #controls {
-      flex-shrink: 0;
-      height: 140px;
-      background: #0d0a22;
-      border-top: 2px solid #3a2f7a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 10px 20px;
-    }
+    #controls { flex-shrink:0; height:140px; background:#0d0a22; border-top:2px solid #3a2f7a; display:flex; align-items:center; justify-content:space-between; padding:10px 28px; }
 
-    /* Bombe-Button */
-    #btn-bomb {
-      width: 100px; height: 100px;
-      background: radial-gradient(circle at 35% 35%, #ff6b3d, #c1210e);
-      border: 3px solid #ff8a60;
-      border-radius: 50%;
-      color: #fff;
-      font-family: 'Courier New', monospace;
-      font-size: 16px;
-      font-weight: bold;
-      letter-spacing: 1px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 2px;
-      cursor: pointer;
-      touch-action: none;
-      box-shadow: 0 4px 15px rgba(255, 80, 30, 0.5);
-      transition: transform 0.08s, box-shadow 0.08s;
-    }
-    #btn-bomb:active, #btn-bomb.pressed {
-      transform: scale(0.9);
-      box-shadow: 0 2px 8px rgba(255, 80, 30, 0.3);
-    }
-    /* Pixel-Bombe-Icon */
-    .bomb-icon {
-      width: 28px; height: 28px;
-      background: #111;
-      border-radius: 50%;
-      border: 2px solid #555;
-      position: relative;
-    }
-    .bomb-icon::before {
-      content: '';
-      position: absolute;
-      top: -8px; right: 4px;
-      width: 4px; height: 8px;
-      background: #ffd740;
-      border-radius: 2px 2px 0 0;
-      transform: rotate(20deg);
-    }
+    /* Joystick */
+    #joystick-area { width:120px; height:120px; display:flex; align-items:center; justify-content:center; }
+    #joystick-base { width:110px; height:110px; background:rgba(42,36,96,0.6); border:3px solid #4a3aaa; border-radius:50%; position:relative; touch-action:none; box-shadow:inset 0 0 20px rgba(0,0,0,0.5),0 0 12px rgba(74,58,170,0.3); }
+    #joystick-knob { width:46px; height:46px; background:radial-gradient(circle at 35% 35%,#9a70ff,#4a1a8a); border:2px solid #9a60ff; border-radius:50%; position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); box-shadow:0 0 12px rgba(154,96,255,0.7); pointer-events:none; }
+
+    /* Bombe */
+    #btn-bomb { width:100px; height:100px; background:radial-gradient(circle at 35% 35%,#ff6b3d,#c1210e); border:3px solid #ff8a60; border-radius:50%; color:#fff; font-family:'Courier New',monospace; font-size:16px; font-weight:bold; letter-spacing:1px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; cursor:pointer; touch-action:none; box-shadow:0 4px 15px rgba(255,80,30,0.5); transition:transform 0.08s,box-shadow 0.08s; }
+    #btn-bomb:active,#btn-bomb.pressed { transform:scale(0.9); box-shadow:0 2px 8px rgba(255,80,30,0.3); }
+    .bomb-icon { width:28px; height:28px; background:#111; border-radius:50%; border:2px solid #555; position:relative; }
+    .bomb-icon::before { content:''; position:absolute; top:-8px; right:4px; width:4px; height:8px; background:#ffd740; border-radius:2px 2px 0 0; transform:rotate(20deg); }
 
     /* ============================================================
-       OVERLAYS (Pause + Hauptmenü)
+       OVERLAYS – gemeinsame Basisklassen
     ============================================================ */
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(10, 8, 30, 0.92);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 100;
-      padding: env(safe-area-inset-top) 16px env(safe-area-inset-bottom);
-      overflow-y: auto;
-    }
-    .overlay.hidden { display: none; }
+    .overlay { position:fixed; inset:0; background:rgba(10,8,30,0.92); display:flex; align-items:center; justify-content:center; z-index:100; padding:env(safe-area-inset-top) 16px env(safe-area-inset-bottom); overflow-y:auto; }
+    .overlay.hidden { display:none; }
+    .overlay-box { background:#0d0a22; border:2px solid #3a2f7a; border-radius:12px; padding:20px 18px; width:100%; max-width:380px; display:flex; flex-direction:column; gap:14px; }
+    .overlay-title { font-family:'Courier New',monospace; font-size:22px; font-weight:bold; color:#ffd740; text-align:center; letter-spacing:2px; }
 
-    .overlay-box {
-      background: #0d0a22;
-      border: 2px solid #3a2f7a;
-      border-radius: 12px;
-      padding: 20px 18px;
-      width: 100%;
-      max-width: 380px;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .overlay-title {
-      font-family: 'Courier New', monospace;
-      font-size: 22px;
-      font-weight: bold;
-      color: #ffd740;
-      text-align: center;
-      letter-spacing: 2px;
-    }
-
-    /* Pause-Overlay Buttons */
-    .pause-btn {
-      width: 100%;
-      padding: 14px;
-      background: #2a2460;
-      border: 2px solid #4a3aaa;
-      border-radius: 8px;
-      color: #fff;
-      font-family: 'Courier New', monospace;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      touch-action: manipulation;
-      transition: background 0.1s;
-    }
-    .pause-btn:active { background: #5540c0; }
-    .pause-btn.primary {
-      background: #1a5a20;
-      border-color: #4aaa50;
-    }
-    .pause-btn.primary:active { background: #2a8a30; }
+    /* Buttons */
+    .pause-btn { width:100%; padding:14px; background:#2a2460; border:2px solid #4a3aaa; border-radius:8px; color:#fff; font-family:'Courier New',monospace; font-size:16px; font-weight:bold; cursor:pointer; touch-action:manipulation; transition:background 0.1s; }
+    .pause-btn:active { background:#5540c0; }
+    .pause-btn.primary { background:#1a5a20; border-color:#4aaa50; }
+    .pause-btn.primary:active { background:#2a8a30; }
+    .pause-btn.danger { background:#5a1a1a; border-color:#aa4a4a; }
+    .pause-btn.danger:active { background:#8a2a2a; }
 
     /* Tabs */
-    #menu-tabs {
-      display: flex;
-      gap: 6px;
-    }
-    .tab-btn {
-      flex: 1;
-      padding: 10px 6px;
-      background: #1a1640;
-      border: 2px solid #3a2f7a;
-      border-radius: 8px;
-      color: #80cbc4;
-      font-family: 'Courier New', monospace;
-      font-size: 13px;
-      font-weight: bold;
-      cursor: pointer;
-      touch-action: manipulation;
-      transition: background 0.1s, color 0.1s;
-    }
-    .tab-btn.active {
-      background: #2a2460;
-      border-color: #7a60e0;
-      color: #ffd740;
-    }
+    #menu-tabs { display:flex; gap:6px; }
+    .tab-btn { flex:1; padding:10px 6px; background:#1a1640; border:2px solid #3a2f7a; border-radius:8px; color:#80cbc4; font-family:'Courier New',monospace; font-size:13px; font-weight:bold; cursor:pointer; touch-action:manipulation; transition:background 0.1s,color 0.1s; }
+    .tab-btn.active { background:#2a2460; border-color:#7a60e0; color:#ffd740; }
+    .tab-content { display:flex; flex-direction:column; gap:12px; }
+    .tab-content.hidden { display:none; }
+    .menu-section { display:flex; flex-direction:column; gap:6px; }
+    .menu-label { font-family:'Courier New',monospace; font-size:11px; color:#80cbc4; text-transform:uppercase; letter-spacing:1px; }
+    .btn-group { display:flex; flex-wrap:wrap; gap:6px; }
+    .sel-btn { padding:9px 12px; background:#1a1640; border:2px solid #3a2f7a; border-radius:6px; color:#aaa; font-family:'Courier New',monospace; font-size:13px; cursor:pointer; touch-action:manipulation; transition:background 0.1s,color 0.1s,border-color 0.1s; }
+    .sel-btn.active { background:#2a2460; border-color:#7a60e0; color:#fff; }
+    .sel-btn.disabled { opacity:0.35; cursor:default; pointer-events:none; }
 
-    .tab-content { display: flex; flex-direction: column; gap: 12px; }
-    .tab-content.hidden { display: none; }
+    /* Mode-Buttons im Hauptmenü */
+    .mode-btn { width:100%; padding:14px; border-radius:8px; font-family:'Courier New',monospace; font-size:15px; font-weight:bold; cursor:pointer; touch-action:manipulation; border:2px solid; transition:background 0.1s; letter-spacing:1px; }
+    #btn-start-solo { background:#1a5a20; border-color:#4aaa50; color:#fff; }
+    #btn-start-solo:active { background:#2a8a30; }
+    #btn-start-multi { background:#1a3a6a; border-color:#4a7aaa; color:#fff; }
+    #btn-start-multi:active { background:#2a5a9a; }
+    #btn-join-room { background:#2a2460; border-color:#4a3aaa; color:#fff; }
+    #btn-join-room:active { background:#4a3aaa; }
 
-    /* Menü-Sektionen */
-    .menu-section { display: flex; flex-direction: column; gap: 6px; }
-    .menu-label {
-      font-family: 'Courier New', monospace;
-      font-size: 11px;
-      color: #80cbc4;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
+    /* ── LOBBY-OVERLAY ──────────────────────────────────────────── */
+    #lobby-overlay .overlay-box { gap:12px; }
 
-    /* Button-Gruppen */
-    .btn-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
+    .lobby-code-box { background:#1a1640; border:2px solid #4a3aaa; border-radius:8px; padding:10px; text-align:center; }
+    .lobby-code-label { font-family:'Courier New',monospace; font-size:11px; color:#80cbc4; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+    .lobby-code-value { font-family:'Courier New',monospace; font-size:32px; font-weight:bold; color:#ffd740; letter-spacing:8px; }
 
-    .sel-btn {
-      padding: 9px 12px;
-      background: #1a1640;
-      border: 2px solid #3a2f7a;
-      border-radius: 6px;
-      color: #aaa;
-      font-family: 'Courier New', monospace;
-      font-size: 13px;
-      cursor: pointer;
-      touch-action: manipulation;
-      transition: background 0.1s, color 0.1s, border-color 0.1s;
-    }
-    .sel-btn.active {
-      background: #2a2460;
-      border-color: #7a60e0;
-      color: #fff;
-    }
-    .sel-btn.disabled {
-      opacity: 0.35;
-      cursor: default;
-    }
+    #lobby-qr { width:140px; height:140px; display:block; margin:0 auto; border:3px solid #4a3aaa; border-radius:8px; }
+    #lobby-qr.hidden { display:none; }
 
-    /* Start-Button */
-    #btn-start-game {
-      width: 100%;
-      padding: 15px;
-      background: linear-gradient(135deg, #c1210e, #ff6b3d);
-      border: 3px solid #ff8a60;
-      border-radius: 10px;
-      color: #fff;
-      font-family: 'Courier New', monospace;
-      font-size: 18px;
-      font-weight: bold;
-      cursor: pointer;
-      touch-action: manipulation;
-      box-shadow: 0 4px 15px rgba(255, 80, 30, 0.4);
-      letter-spacing: 2px;
-      margin-top: 4px;
-    }
-    #btn-start-game:active {
-      transform: scale(0.97);
-      box-shadow: 0 2px 8px rgba(255, 80, 30, 0.3);
-    }
+    #lobby-join-url { font-family:'Courier New',monospace; font-size:10px; color:#80cbc4; text-align:center; word-break:break-all; }
 
-    /* iOS PWA Viewport-Fix */
-    @media (display-mode: standalone) {
-      html { height: calc(100% + env(safe-area-inset-top)); overflow: hidden; }
-      body { position: relative !important; height: 100% !important; }
-    }
+    .lobby-section-label { font-family:'Courier New',monospace; font-size:11px; color:#80cbc4; text-transform:uppercase; letter-spacing:1px; }
 
-    @supports (-webkit-touch-callout: none) {
-      input, textarea, select { font-size: 16px !important; }
-    }
+    #lobby-player-list { display:flex; flex-direction:column; gap:4px; }
+    .lobby-player-slot { font-family:'Courier New',monospace; font-size:13px; padding:6px 8px; border-radius:6px; }
+    .slot-filled { color:#a5d6a7; background:rgba(42,106,42,0.3); display:block; padding:4px 8px; border-radius:4px; }
+    .slot-empty  { color:#666; }
+
+    /* ── JOIN-OVERLAY ──────────────────────────────────────────── */
+    #join-code-input { width:100%; padding:14px; background:#1a1640; border:2px solid #4a3aaa; border-radius:8px; color:#fff; font-family:'Courier New',monospace; font-size:24px; font-weight:bold; text-align:center; letter-spacing:8px; text-transform:uppercase; }
+    #join-code-input::placeholder { color:#444; letter-spacing:4px; }
+    #join-error { color:#ff5252; font-family:'Courier New',monospace; font-size:13px; text-align:center; }
+    #join-error.hidden { display:none; }
+
+    /* iOS PWA */
+    @media (display-mode:standalone) { html { height:calc(100% + env(safe-area-inset-top)); overflow:hidden; } body { position:relative !important; height:100% !important; } }
+    @supports (-webkit-touch-callout:none) { input,textarea,select { font-size:16px !important; } }
   </style>
 </head>
 <body>
@@ -334,6 +124,9 @@
     <canvas id="game" width="390" height="330"></canvas>
   </div>
   <div id="controls">
+    <div id="joystick-area">
+      <div id="joystick-base"><div id="joystick-knob"></div></div>
+    </div>
     <div id="btn-bomb"><div class="bomb-icon"></div>BOMB</div>
   </div>
 </div>
@@ -358,21 +151,13 @@
   <div class="overlay-box">
     <div class="overlay-title">* BOMBERMAN *</div>
 
-    <!-- Tabs -->
     <div id="menu-tabs">
-      <button class="tab-btn active" data-tab="start">Spiel starten</button>
+      <button class="tab-btn active" data-tab="start">Spielen</button>
       <button class="tab-btn" data-tab="settings">Einstellungen</button>
     </div>
 
-    <!-- Tab: Spiel starten -->
+    <!-- Tab: Spielen -->
     <div id="tab-start" class="tab-content">
-      <div class="menu-section">
-        <div class="menu-label">Modus</div>
-        <div class="btn-group">
-          <button class="sel-btn active" data-mode="single">EINZEL</button>
-          <button class="sel-btn disabled" data-mode="multi">MULTI (BALD)</button>
-        </div>
-      </div>
       <div class="menu-section">
         <div class="menu-label">Welt wählen</div>
         <div class="btn-group">
@@ -381,20 +166,16 @@
           <button class="sel-btn world-btn" data-world="2">EIS</button>
         </div>
       </div>
-      <button id="btn-start-game">&gt;&gt; START</button>
+
+      <button id="btn-start-solo" class="mode-btn">&#9654; SOLO STARTEN</button>
+      <button id="btn-start-multi" class="mode-btn">&#9654;&#9654; MULTIPLAYER ERSTELLEN</button>
+      <button id="btn-join-room" class="mode-btn">&#9670; RAUM BEITRETEN</button>
     </div>
 
     <!-- Tab: Einstellungen -->
     <div id="tab-settings" class="tab-content hidden">
       <div class="menu-section">
-        <div class="menu-label">Charakter</div>
-        <div class="btn-group">
-          <button class="sel-btn char-btn active" data-char="0">STANDARD</button>
-          <button class="sel-btn char-btn disabled" data-char="1">BLAU (BALD)</button>
-        </div>
-      </div>
-      <div class="menu-section">
-        <div class="menu-label">Geschwindigkeit der Bewegung</div>
+        <div class="menu-label">Geschwindigkeit</div>
         <div class="btn-group">
           <button class="sel-btn speed-btn" data-speed="low">LANGSAM</button>
           <button class="sel-btn speed-btn active" data-speed="normal">NORMAL</button>
@@ -402,7 +183,7 @@
         </div>
       </div>
       <div class="menu-section">
-        <div class="menu-label">Menge der Collectibles</div>
+        <div class="menu-label">Collectibles</div>
         <div class="btn-group">
           <button class="sel-btn coll-btn" data-coll="wenig">Wenig</button>
           <button class="sel-btn coll-btn active" data-coll="normal">Normal</button>
@@ -411,20 +192,54 @@
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
+<!-- ============================================================
+     LOBBY-OVERLAY (Raum erstellt / beigetreten)
+============================================================ -->
+<div id="lobby-overlay" class="overlay hidden">
+  <div class="overlay-box">
+    <div class="overlay-title">LOBBY</div>
+
+    <div class="lobby-code-box">
+      <div class="lobby-code-label">Raum-Code</div>
+      <div class="lobby-code-value" id="lobby-code">----</div>
+    </div>
+
+    <img id="lobby-qr" class="hidden" alt="QR-Code" />
+    <div id="lobby-join-url"></div>
+
+    <div class="lobby-section-label">Spieler (leere Slots = KI)</div>
+    <div id="lobby-player-list"></div>
+
+    <button id="btn-lobby-start" class="pause-btn primary">&gt;&gt; SPIEL STARTEN</button>
+    <button id="btn-lobby-leave" class="pause-btn danger">&#8592; VERLASSEN</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     JOIN-OVERLAY (Raum beitreten)
+============================================================ -->
+<div id="join-overlay" class="overlay hidden">
+  <div class="overlay-box">
+    <div class="overlay-title">BEITRETEN</div>
+    <div class="menu-label">Raum-Code eingeben (4 Buchstaben)</div>
+    <input id="join-code-input" type="text" maxlength="4" placeholder="XXXX" autocapitalize="characters" autocorrect="off" spellcheck="false" />
+    <div id="join-error" class="hidden"></div>
+    <button id="btn-join-confirm" class="pause-btn primary">&gt; BEITRETEN</button>
+    <button id="btn-join-back" class="pause-btn" onclick="document.getElementById('join-overlay').classList.add('hidden');document.getElementById('main-menu-overlay').classList.remove('hidden');">&#8592; ZURUCK</button>
+  </div>
+</div>
+
+<!-- Socket.io Client -->
+<script src="/socket.io/socket.io.js"></script>
+<script src="/client.js"></script>
 <script src="/game.js"></script>
 <script>
-  // Textmarkierung verhindern (iOS: langes Drücken auf D-Pad)
   document.addEventListener('selectstart', e => e.preventDefault());
   document.addEventListener('contextmenu', e => e.preventDefault());
-
-  // Service Worker registrieren
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
-  }
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
 </script>
 </body>
 </html>
